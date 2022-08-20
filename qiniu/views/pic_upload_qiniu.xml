@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="view_pic_upload_search_form">
+            <field name="name">OSS</field>
+            <field name="model">pic.upload</field>
+            <field name="arch" type="xml">
+                <search string="">
+                    <field name="name"/>
+                </search> 
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_pic_upload_tree">
+            <field name="name">OSS</field>
+            <field name="model">pic.upload</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="avatar"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_pic_upload_form">
+            <field name="name">OSS</field>
+            <field name="model">pic.upload</field>
+            <field name="arch" type="xml">
+                <form string="">
+                    <sheet>
+                        <group string="个人信息">
+                            <group>
+                                <group>
+                                    <field name="name"/>
+                                </group>
+                                <group>
+                                    <field name="avatar"/>
+                                </group>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page name="项目附件" string="项目附件">
+                                <group>
+                                    <field name="files"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <!-- Attachment preview -->
+                    <!--
+                    <div class="o_attachment_preview"/>
+                    <div class="oe_chatter">
+                        <field name="message_ids" widget="mail_thread"/>
+                        <field name="message_follower_ids" groups="base.group_user"/>
+                        <field name="activity_ids"/>
+                    </div>
+                    -->
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="view_pic_upload_action">
+            <field name="name">OSS</field>
+            <field name="res_model">pic.upload</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_pic_upload_tree"></field>
+        </record>
+
+    </data>
+</odoo>
