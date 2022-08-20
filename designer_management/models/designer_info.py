@@ -5,6 +5,9 @@ import base64
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError, AccessError
 from odoo.modules.module import get_module_resource
+import json
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class designer_info(models.Model):
@@ -74,7 +77,48 @@ class designer_info(models.Model):
         self.write({'status': 'cancel'})
         return
 
+    @api.model
+    def create_designer_info(self,data):
+        value = {"result":True,
+                 "msg":"hello,少年",
+                 "data":None}
+        _logger.info(f"data:{data}")
+        data = json.loads(data)
+        val = {
+            "uuid":data.get("uuid",""),
+            "name":data.get("name",""),
+            "phone":data.get("phone",""),
+            "email":data.get("email",""),
+        }
+        designer = self.env['designer.info'].create(val)
+        return json.dumps(value)
 
+    @api.model
+    def get_designer_info(self,data):
+        _logger.info('-- in get_designer_info: {data}')
+        _logger.info('-- type of data: {type(data)}')
+        value = {"result":False,
+                 "msg":"hello,designer!",
+                 "data":None}
+        uuid =json.load(data).get("uuid")
+        if uuid == None or uuid == "":
+            return json.dumps(value)
+        designer = self.env['designer.info'].search([['uuid',"=",uuid]])
+        if len(designer) == 0:
+            return json.dumps(value)
+        else:
+            value['result'] = True
+            value['data'] = designer[0]
+            return json.dumps(value)
+
+    @api.model
+    def update_designer_info(self,data):
+        value = {"result":False,
+                 "msg":"hello,old friend!",
+                 "data":None}
+        designer = self.env['designer.info'].search(['uuid',"=",uuid])
+        return json.dumps()
+    
 class designer_type(models.Model):
     _name = 'designer.type'
     _description = 'designer type'
