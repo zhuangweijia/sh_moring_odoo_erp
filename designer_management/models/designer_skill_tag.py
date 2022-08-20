@@ -8,7 +8,7 @@ from odoo.modules.module import get_module_resource
 
 
 class designer_skill(models.Model):
-    _name = 'designer.skill'
-    _description = 'designer skill'
+    _name = 'designer.skill.tag'
+    _description = 'designer skill.tag'
 
-    name = fields.Char('技能标签', translate=True)
+    name = fields.Char('skill tag', translate=True)

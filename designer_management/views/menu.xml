@@ -1,0 +1,53 @@
+<odoo>
+    <data>
+
+        <!-- 一级菜单 -->
+        <menuitem name="designer" id="designer_info_menu_root"/>
+
+        <!-- 二级菜单 -->
+        <menuitem
+            name="designer"
+            id="designer_info_menu"
+            parent="designer_info_menu_root"
+            action="designer_info_action"
+            />
+        <menuitem
+            name="setting"
+            id="designer_configure"
+            parent="designer_info_menu_root"
+            />
+
+        <!-- 三级菜单 -->
+        <menuitem
+            name="designer type"
+            id="designer_types"
+            parent="designer_configure"
+            action="designer_type_action"
+            />
+        <menuitem
+            name="designer field"
+            id="designer_field"
+            parent="designer_configure"
+            action="designer_field_action"
+            />
+        <menuitem
+            name="designer skill tag"
+            id="designer_skill_tag"
+            parent="designer_configure"
+            action="designer_skill_tag_action"
+            />
+        <menuitem
+            name="designer project tag"
+            id="designer_project_tag"
+            parent="designer_configure"
+            action="designer_project_tag_action"
+            />
+        <menuitem
+            name="designer product tag"
+            id="designer_product_tag"
+            parent="designer_configure"
+            action="designer_product_tag_action"
+            />
+
+    </data>
+</odoo>

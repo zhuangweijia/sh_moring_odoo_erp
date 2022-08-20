@@ -1,7 +1,7 @@
 <odoo>
     <data>
         <record id="view_designer_info_filter" model="ir.ui.view">
-            <field name="name">设计师</field>
+            <field name="name">designer</field>
             <field name="model">designer.info</field>
             <field name="arch" type="xml">
                 <search>
@@ -9,22 +9,23 @@
                     <field name="phone"/>
                     <field name="email"/>
                     <field name="field_ids"/>
+                    <field name="skill_tag_ids"/>
                 </search>
             </field>
         </record>
 
         <record id="view_designer_info_tree" model="ir.ui.view">
-            <field name="name">设计师</field>
+            <field name="name">designer</field>
             <field name="model">designer.info</field>
             <field name="arch" type="xml">
-                <tree>
+                <tree sample="1">
                     <field name="name"/>
                     <field name="phone"/>
                     <field name="email"/>
-                    <field name="create_date" string="创建时间" optional="hide"/>
-                    <field name="write_date" string="更新时间"/>
+                    <field name="create_date" optional="hide"/>
+                    <field name="write_date"/>
                     <field name="field_ids" widget="many2many_tags"/>
-                    <field name="schedule"/>
+                    <field name="skill_tag_ids" widget="many2many_tags"/>
                     <field name="status" widget="badge"
                         decoration-info="status == 'draft'"
                         decoration-success="status == 'confirm'"
@@ -35,16 +36,16 @@
         </record>
 
         <record id="view_designer_info_form" model="ir.ui.view">
-            <field name="name">设计师</field>
+            <field name="name">designer</field>
             <field name="model">designer.info</field>
             <field name="arch" type="xml">
                 <form>
                     <header>
-                        <button name="action_confirm" type="object" string="确认入库"
+                        <button name="action_confirm" type="object" string="confirm"
                             attrs="{'invisible':[('status','!=','draft')]}" class='oe_highlight'/>
-                        <button name="action_draft" type="object" string="回到草稿"
+                        <button name="action_draft" type="object" string="back to draft"
                             attrs="{'invisible':[('status','!=','cancel')]}" class='btn-secondary'/>
-                        <button name="action_cancel" type="object" string="取消"
+                        <button name="action_cancel" type="object" string="cancel"
                             attrs="{'invisible':[('status','==','cancel')]}" class='btn-secondary'/>
                         <field name="status" widget="statusbar"/>
                     </header>
@@ -52,51 +53,67 @@
                         <field name="image_1920" widget='image' class="oe_avatar" options='{"zoom": true, "preview_image":"image_128"}'/>
                         <div class="oe_title">
                             <h1>
-                                <field name="name" placeholder="设计师姓名" required="True"/>
+                                <field name="name" placeholder="Name of designer" required="True"/>
                             </h1>
                         </div>
                         <group>
-                            <group string='基本信息'>
-                                <field name="recommend_degree" widget='priority'/>
+                            <group string='Basic'>
+                                <field name="recommendation_level" widget='priority'/>
                                 <field name="phone" widget="phone"/>
                                 <field name="email" widget="email"/>
-                                <field name="address"/>
-                                <field name="bank_account"/>
-                                <field name="type_id"/>
-                                <field name="field_ids" widget="many2many_tags"/>
-                            </group>
-                            <group string='其他'>
-                                <field name="schedule" widget="boolean_toggle"/>
+                                <field name="postal_address"/>
+                                <field name="source"/>
+                                <field name="intermediate_contact"/>
+                                <field name="intermediate_agency"/>
                                 <field name='is_trained'/>
-                                <field name='is_exclusive_signed'/>
+                                <field name='lastest_trained_date'/>
+                                <field name="bank_account_info"/>
+                            </group>
+                            <group string='Project'>
+                                <field name="budget_unit"/>
+                                <field name="budget_refer"/>
+                                <field name="project_name_list"/>
+                                <field name="collaboration_status"/>
+                                <field name="current_project"/>
+                                <field name="book"/>
+                                <field name="book_status"/>
+                                <field name="confirmed_date"/>
                             </group>
                         </group>
                         <group>
-                            <group string='合作信息'>
-                                <field name="is_cooperate"/>
-                                <field name="cooperate_pjt" attrs="{'invisible':[('is_cooperate','=',False)]}"/>
-                                <field name="cooperate_note"/>
-                                <field name="budget_refer"/>
+                            <group string='Description'>
+                                <group>
+                                    <field name="memo"/>
+                                </group>
                             </group>
-                            <group>
+                            <group string='Tags'>
                                 <!-- <field name="files" widget="many2many_binary"/> -->
+                                <field name="type_id"/>
+                                <field name="field_ids" widget="many2many_tags"/>
+                                <field name="skill_tag_ids" widget="many2many_tags"/>
+                                <field name="project_tag_ids" widget="many2many_tags"/>
+                                <field name="product_tag_ids" widget="many2many_tags"/>
                             </group>
                         </group>
                         <notebook>
-                            <page string="整体介绍">
+                            <page string="Introduction">
                                 <group>
+                                    <field name="specialities"/>
+                                    <field name="specialities_brief"/>
+                                    <field name="style"/>
                                     <field name="brief_intro"/>
-                                    <field name="feature"/>
+                                </group>
+                                <group>
                                     <field name="endorsement"/>
-                                    <field name="note"/>
                                 </group>
                             </page>
-                            <page string="项目经历">
+                            <page string="Project">
                                 <field name="project" type='html'/>
                             </page>
-                            <page string="电子签名">
+                            <page string="files">
                                 <group>
-                                    <field name="files" widget="many2many_binary"/>
+                                    <field name="e_signature_pic" string='files'
+                                        widget="many2many_binary"/>
                                 </group>
                             </page>
                         </notebook>
@@ -111,7 +128,7 @@
         </record>
 
         <record model="ir.actions.act_window" id="designer_info_action">
-            <field name="name">设计师</field>
+            <field name="name">designer</field>
             <field name="res_model">designer.info</field>
             <field name="view_mode">tree,form</field>
         </record>
@@ -119,19 +136,19 @@
 
         <!-- 设计师类型 -->
         <record id="view_designer_type_tree" model="ir.ui.view">
-            <field name="name">设计师类型</field>
+            <field name="name">designer type</field>
             <field name="model">designer.type</field>
             <field name="arch" type="xml">
                 <tree>
                     <field name="name"/>
-                    <field name="create_date" string="创建时间" optional="hide"/>
-                    <field name="write_date" string="更新时间"/>
+                    <field name="create_date" optional="hide"/>
+                    <field name="write_date"/>
                 </tree>
             </field>
         </record>
 
         <record id="view_designer_type_form" model="ir.ui.view">
-            <field name="name">设计师类型</field>
+            <field name="name">designer type</field>
             <field name="model">designer.type</field>
             <field name="arch" type="xml">
                 <form>
@@ -141,8 +158,8 @@
                                 <field name="name"/>
                             </group>
                             <group>
-                                <field name="create_date" string="创建时间" readonly="1"/>
-                                <field name="write_date" string="更新时间" readonly="1"/>
+                                <field name="create_date" readonly="1"/>
+                                <field name="write_date" readonly="1"/>
                             </group>
                         </group>
                     </sheet>
@@ -151,26 +168,26 @@
         </record>
 
         <record model="ir.actions.act_window" id="designer_type_action">
-            <field name="name">设计师类型</field>
+            <field name="name">designer type</field>
             <field name="res_model">designer.type</field>
             <field name="view_mode">tree,form</field>
         </record>
 
         <!--设计师领域-->
         <record id="view_designer_field_tree" model="ir.ui.view">
-            <field name="name">设计师领域</field>
+            <field name="name">designer type</field>
             <field name="model">designer.field</field>
             <field name="arch" type="xml">
                 <tree>
                     <field name="name"/>
-                    <field name="create_date" string="创建时间" optional="hide"/>
-                    <field name="write_date" string="更新时间"/>
+                    <field name="create_date" optional="hide"/>
+                    <field name="write_date"/>
                 </tree>
             </field>
         </record>
 
         <record id="view_designer_field_form" model="ir.ui.view">
-            <field name="name">设计师领域</field>
+            <field name="name">designer type</field>
             <field name="model">designer.field</field>
             <field name="arch" type="xml">
                 <form>
@@ -180,8 +197,8 @@
                                 <field name="name"/>
                             </group>
                             <group>
-                                <field name="create_date" string="创建时间" readonly="1"/>
-                                <field name="write_date" string="更新时间" readonly="1"/>
+                                <field name="create_date" readonly="1"/>
+                                <field name="write_date" readonly="1"/>
                             </group>
                         </group>
                     </sheet>
@@ -190,34 +207,10 @@
         </record>
 
         <record model="ir.actions.act_window" id="designer_field_action">
-            <field name="name">设计师领域</field>
+            <field name="name">designer type</field>
             <field name="res_model">designer.field</field>
             <field name="view_mode">tree,form</field>
         </record>
 
-        <menuitem name="设计师" id="designer_info_menu_root"/>
-        <menuitem
-            name="设计师"
-            id="designer_info_menu"
-            parent="designer_info_menu_root"
-            action="designer_info_action"
-            />
-        <menuitem
-            name="配置"
-            id="designer_configure"
-            parent="designer_info_menu_root"
-            />
-        <menuitem
-            name="设计师类型"
-            id="designer_types"
-            parent="designer_configure"
-            action="designer_type_action"
-            />
-        <menuitem
-            name="设计师领域"
-            id="designer_field"
-            parent="designer_configure"
-            action="designer_field_action"
-            />
     </data>
 </odoo>

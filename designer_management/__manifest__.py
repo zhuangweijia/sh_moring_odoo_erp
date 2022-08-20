@@ -26,7 +26,10 @@
     'data': [
         'security/ir.model.access.csv',
         'views/designer_info.xml',
-        # 'views/templates.xml',
+        'views/designer_skill_tag.xml',
+        'views/designer_product_tag.xml',
+        'views/designer_project_tag.xml',
+        'views/menu.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
