@@ -127,10 +127,39 @@
             </field>
         </record>
 
+        <record id="view_designer_info_kanban" model="ir.ui.view">
+            <field name="name">designer</field>
+            <field name="model">designer.info</field>
+            <field name="arch" type="xml">
+                <kanban sample="1">
+                    <field name="name"/>
+                    <field name="phone"/>
+                    <field name="email"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click">
+                                <div class="o_kanban_image">
+                                    <img t-att-src="kanban_image('im_livechat.channel', 'image_128')"
+                                        class="img-fluid" alt="Channel"/>
+                                </div>
+                                <div class="oe_kanban_details">
+                                    <ul>
+                                        <li>Name:<field name="name"/></li>
+                                        <li>Tel:<field name="phone"/></li>
+                                        <li>Email:<field name="email"/></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
         <record model="ir.actions.act_window" id="designer_info_action">
             <field name="name">designer</field>
             <field name="res_model">designer.info</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">tree,kanban,form</field>
         </record>
 
 
