@@ -26,11 +26,11 @@ class designer_info(models.Model):
 
     # base
     uuid = fields.Char(string='uuid')
-    name = fields.Char(string='name')
-    phone = fields.Char(string='tel')
+    name = fields.Char(string='name', required=True)
+    phone = fields.Char(string='tel', required=True)
     postal_address = fields.Char(translate=True)
-    email = fields.Char(string='email')
-    source = fields.Char(string='source', translate=True)
+    email = fields.Char(string='email', required=True)
+    source = fields.Char(string='source', translate=True, default='bonjourid.com')
     image_1920 = fields.Image('portrait')
     # image_1920 = fields.Image('portrait', default=_default_image)
     intermediate_contact = fields.Char()
@@ -39,9 +39,9 @@ class designer_info(models.Model):
     lastest_trained_date = fields.Date()
     e_signature_pic = fields.Many2many('ir.attachment')
     # files = fields.Many2many('ir.attachment')
-    recommendation_level = fields.Selection([('0','0'), ('1','1'), ('2','2'),
+    recommendation_level = fields.Selection([('1','1'), ('2','2'),
                                              ('3','3'), ('4','4'), ('5','5')],
-                                             default='0')
+                                             default='1', required=True)
     # project
     current_project = fields.Char(translate=True)
     book = fields.Char(translate=True)
@@ -58,7 +58,8 @@ class designer_info(models.Model):
     style = fields.Char(translate=True)
     brief_intro = fields.Text(string='introduction', help=_('Please enter a bio for this designer...'), translate=True)
     memo = fields.Text(string='memo', help=_('Please enter other remarks...'), translate=True)
-    endorsement = fields.Text(string='endorsement', help=_("Please enter this designer's endorsement..."), translate=True)
+    endorsement = fields.Text(string='endorsement', required=True, translate=True,
+                              help=_("Please enter this designer's endorsement..."))
     # Cooperation
     collaboration_status = fields.Boolean(default=False)
     # tags
