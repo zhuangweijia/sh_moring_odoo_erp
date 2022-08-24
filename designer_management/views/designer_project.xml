@@ -1,0 +1,63 @@
+<odoo>
+    <data>
+
+        <record id="view_designer_project_tree" model="ir.ui.view">
+            <field name="name">designer project</field>
+            <field name="model">designer.project</field>
+            <field name="arch" type="xml">
+                <tree sample="1">
+                    <field name="designer_uuid"/>
+                    <field name="project_name"/>
+                    <field name="position_name"/>
+                    <field name="start_time"/>
+                    <field name="end_time"/>
+                    <field name="is_current_job"/>
+                    <field name="product"/>
+                    <field name="client_brand"/>
+                    <field name="description"/>
+                    <field name="domain_ids"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_designer_project_form" model="ir.ui.view">
+            <field name="name">designer project</field>
+            <field name="model">designer.project</field>
+            <field name="arch" type="xml">
+				<form>
+					<!--
+					<header>
+					</header>
+					-->
+					<sheet>
+						<group>
+							<group>
+								<field name="designer_uuid"/>
+								<field name="project_name"/>
+								<field name="position_name"/>
+								<field name="start_time"/>
+								<field name="end_time"/>
+							</group>
+							<group>
+								<field name="is_current_job"/>
+								<field name="product"/>
+								<field name="client_brand"/>
+								<field name="description"/>
+								<field name="domain_ids" widget="many2many_tags"/>
+								<field name="photoes" widget="many2many_binary"/>
+								<field name="product"/>
+							</group>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+        <record model="ir.actions.act_window" id="designer_project_action">
+            <field name="name">designer project</field>
+            <field name="res_model">designer.project</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+    </data>
+</odoo>

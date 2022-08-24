@@ -205,8 +205,6 @@ class designer_info(models.Model):
     style = fields.Char(translate=True)
     brief_intro = fields.Text(string='introduction', help=_('Please enter a bio for this designer...'), translate=True)
     memo = fields.Text(string='memo', help=_('Please enter other remarks...'), translate=True)
-    endorsement = fields.Text(string='endorsement', required=True, translate=True,
-                              help=_("Please enter this designer's endorsement..."))
     # Cooperation
     collaboration_status = fields.Boolean(default=False)
     # tags
@@ -219,9 +217,9 @@ class designer_info(models.Model):
     product_tag_ids = fields.Many2many('designer.ability.tag','designer_product_tag_rel',
                                     'info_id', 'product_id', string='Designer Product Tag',
                                      domain="[('tag_type','=','1')]")
-    type_id = fields.Many2one('designer.type', string='talent type')
-    field_ids = fields.Many2many('designer.field', 'designer_info_field_rel',
-                                 'info_id','field_id',
+    type_id = fields.Many2one('designer.type', string='talent type', required=True)
+    domain_ids = fields.Many2many('designer.domain', 'designer_info_domain_rel',
+                                 'info_id','domain_id',
                                  string='domain') 
     # other
     is_exclusive_signed = fields.Boolean(default=True)
@@ -232,6 +230,7 @@ class designer_info(models.Model):
     status = fields.Selection([('draft','draft'),
                                ('confirm', 'confirm'),
                                ('cancel', 'cancel')], default='draft')
+    project_line = fields.One2many('designer.project', 'designer_info_id', string='Projects')
 
     def action_confirm(self):
         self.write({'status': 'confirm'})
@@ -425,16 +424,24 @@ class designer_info(models.Model):
         value['result'] = 1
         return json.dumps(value)
     
-class designer_type(models.Model):
-    _name = 'designer.type'
-    _description = 'designer type'
 
-    name = fields.Char('desiger type', translate=True)
+class designer_project(models.Model):
+    _name = 'designer.project'
+    _description = 'designer project'
 
+    # _inherit = ['mail.thread', 'mail.activity.mixin']
 
-class designer_field(models.Model):
-    _name = 'designer.field'
-    _description = 'designer field'
-    
-    name = fields.Char('designer domain', translate=True)
-
+    designer_uuid = fields.Char()
+    project_name = fields.Char(required=True)
+    position_name = fields.Char(required=True)
+    start_time = fields.Datetime(required=True)
+    end_time = fields.Datetime(required=True)
+    is_current_job = fields.Boolean(default=False)
+    product = fields.Char()
+    client_brand = fields.Char(required=True)
+    description = fields.Text(required=True)
+    active = fields.Boolean(default=True)
+    photoes = fields.Many2many('ir.attachment')
+    designer_info_id = fields.Many2one('designer.info',string='designer info', ondelete='cascade')
+    domain_ids = fields.Many2many('designer.domain', 'designer_project_domain_rel',
+            'project_id','domain_id', string='domain')

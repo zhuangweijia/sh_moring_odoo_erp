@@ -25,31 +25,11 @@
             action="designer_type_action"
             />
         <menuitem
-            name="designer field"
-            id="designer_field"
+            name="designer domain"
+            id="designer_domain"
             parent="designer_configure"
-            action="designer_field_action"
+            action="designer_domain_action"
             />
-        <!--
-        <menuitem
-            name="designer skill tag"
-            id="designer_skill_tag"
-            parent="designer_configure"
-            action="designer_skill_tag_action"
-            />
-        <menuitem
-            name="designer project tag"
-            id="designer_project_tag"
-            parent="designer_configure"
-            action="designer_project_tag_action"
-            />
-        <menuitem
-            name="designer product tag"
-            id="designer_product_tag"
-            parent="designer_configure"
-            action="designer_product_tag_action"
-            />
-        -->
         <menuitem
             name="designer ability tag"
             id="designer_ability_tag"
