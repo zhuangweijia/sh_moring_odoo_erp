@@ -1,5 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_designer_info,Designer Info,model_designer_info,base.group_user,1,1,1,1
+access_designer_info,Designer Info,model_designer_info,base.group_user,0,0,0,0
 access_designer_type,Designer Type,model_designer_type,base.group_user,1,1,1,1
 access_designer_domain,Designer Domain,model_designer_domain,base.group_user,1,1,1,1
 access_designer_ability_tag,Designer Ability Tag,model_designer_ability_tag,base.group_user,1,1,1,1
