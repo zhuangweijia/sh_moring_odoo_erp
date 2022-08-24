@@ -4,11 +4,131 @@ import base64
 import logging
 
 from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError, AccessError
+from odoo.exceptions import AccessError
 from odoo.modules.module import get_module_resource
 import json
+#from jsonschema import validate, ValidationError
+from validator import validate
 import logging
 _logger = logging.getLogger(__name__)
+
+schema_designer = {
+    "lang":"required",
+    "uuid":"required",
+    "firstname": "required",
+    "lastname": "required",
+    "email":"required",
+    "budget_unit_u":"required",
+    "introduction_u":"required",
+    "tel":"required",
+    "portrait_u":"required",
+    "have_exclusive_contract":"required",
+    "experience_years":"required",
+    "domain":"required",
+    "educations":"required",
+    "creation_pics":"required",
+    "skill_tags":"required",
+}
+
+schema_designer2 = {
+    "lang":"required",
+    "uuid":"required",
+    "firstname": "min:3|max:30",
+    "lastname": "min:3|max30",
+    "email":"mail",
+    "budget_unit_u":"required",
+    "introduction_u":"required",
+    "tel":"required",
+    "portrait_u":"required",
+    "have_exclusive_contract":"required",
+    "experience_years":"required",
+    "domain":"required",
+    "educations":"list|min:1",
+    "creation_pics":"list|min:1",
+    "skill_tags":"list|min:1",
+}
+
+'''  
+    #"available_from":lambda x: x == null or x=="" or 
+    #"available_until":"required",
+    #"book_u":"required",
+    "home_page":lambda x:  x == False or isinstance(x,str) and len(x)<= 50,
+    "linkin_page":lambda x:  x == False or isinstance(x,str) and len(x)<= 50,
+    "intermediate_agency":lambda x:  x == False or isinstance(x,str) and len(x)<= 50,
+    "intermediate_contact":lambda x:  x == False or isinstance(x,str) and len(x)<= 50,
+    "specialities":lambda x:   x == False or isinstance(x,str) and len(x)<= 2000,
+    "memo":lambda x:  x == False or isinstance(x,str) and len(x)<= 2000,
+    "postal_address":lambda x:  x == False or isinstance(x,str) and len(x)<= 200,
+    "bank_account_info":lambda x:  x == False or isinstance(x,str) and len(x)<= 200,
+    '''
+
+schema_designer22_= {
+    "uuid":"required",
+    "first_name": "required",
+    "last_name": "required",
+    "email":"required|email",
+}
+
+def json_validate(schema):
+    def wrapper(func):
+        def inner(obj, *args, **kwargs):
+            _logger.info(f"wrapper obj:{obj}")
+            _logger.info(f"wrapper args:{args}")
+            _logger.info(f"wrapper args[0]:{args[0]}")
+            try:
+                json_data = json.loads(args[0])
+            except Exception as e:
+                value = {
+                    "result":-1,
+                    "data":None,
+                    "errors":"json is not validate",
+                }
+                return json.dumps(value)
+            result,_,errors = validate(json_data,schema,return_info=True)
+            if result== False:
+                value = {
+                    "result":-1,
+                    "data":None,
+                    "errors":errors,
+                }
+                return json.dumps(value)
+            _logger.info(f"参数校验OK")
+            return func(obj ,*args, **kwargs)
+        return inner
+    return wrapper
+
+schema_uuid1 = {
+    "uuid":"required",
+}
+
+def validate_uuid(schema):
+    def wrapper(func):
+        def inner(obj, *args, **kwargs):
+            _logger.info(f"wrapper obj:{obj}")
+            _logger.info(f"wrapper args:{args}")
+            _logger.info(f"wrapper args[0]:{args[0]}")
+            try:
+                json_data = json.loads(args[0])
+            except Exception as e:
+                value = {
+                    "result":-1,
+                    "data":None,
+                    "errors":"json is not validate",
+                }
+                return json.dumps(value)
+            result,_,errors = validate(json_data,schema,return_info=True)
+            if result== False:
+                value = {
+                    "result":-1,
+                    "data":None,
+                    "errors":errors,
+                }
+                return json.dumps(value)
+            return func(obj ,*args, **kwargs)
+        return inner
+    return wrapper
+
+
 
 
 class designer_info(models.Model):
@@ -42,6 +162,33 @@ class designer_info(models.Model):
     recommendation_level = fields.Selection([('1','1'), ('2','2'),
                                              ('3','3'), ('4','4'), ('5','5')],
                                              default='1', required=True)
+
+    # 用于同步的冗余字段 add by eric
+    lang = fields.Char(string='lang')
+    firstname = fields.Char(string='first_name')
+    lastname = fields.Char(string='last_name')
+    endorsement = fields.Char(string='last_name')
+    budget_unit_u = fields.Integer(string='budget_unit_u')
+    specialities_u = fields.Char(string='specialities_u')
+    memo_u = fields.Char(string='memo_u')
+    introduction_u = fields.Char(string='introduction_u')
+    tel = fields.Char(string='tel')
+    portrait_u = fields.Char(string='portrait_u')
+    #intermediate_agency = fields.Char(string='intermediate_agency')
+    #intermediate_contact = fields.Char(string='intermediate_contact')
+    #email = fields.Char(string='email')
+    #postal_address = fields.Char(string='postal_address')
+    #bank_account_info = fields.Char(string='bank_account_info')
+    have_exclusive_contract = fields.Integer(string='have_exclusive_contract')
+    excluesive_contract_content_u = fields.Char(string='excluesive_contract_content_u')
+    available_from = fields.Date(string='available_from')
+    available_util = fields.Date(string='available_util')
+    home_page = fields.Char(string='home_page')
+    linkin_page = fields.Char(string='linkin_page')
+    experience_years = fields.Char(string='experience_years')
+
+
+    
     # project
     current_project = fields.Char(translate=True)
     book = fields.Char(translate=True)
@@ -110,47 +257,173 @@ class designer_info(models.Model):
         self.write({'status': 'cancel'})
         return
 
+
     @api.model
     def create_designer_info(self,data):
-        value = {"result":True,
-                 "msg":"hello,少年",
+        value = {"result":-1,
+                 "errors":"",
                  "data":None}
-        _logger.info(f"data:{data}")
-        data = json.loads(data)
-        val = {
-            "uuid":data.get("uuid",""),
-            "name":data.get("name",""),
-            "phone":data.get("phone",""),
-            "email":data.get("email",""),
-        }
-        designer = self.env['designer.info'].create(val)
+        try:
+            json_data = json.loads(data)
+        except Exception as e:
+            value["errors"] ="json is not validate"
+            return json.dumps(value)
+
+        result,_,errors = validate(json_data ,schema_designer ,return_info=True)
+        if result== False:
+            value["errors"] = errors
+            return json.dumps(value)
+
+        val = self.get_designer_value_from_json(json_data)
+        self.env['designer.info'].create(val)
+
+        value['result'] = 1
         return json.dumps(value)
 
     @api.model
+    def get_designer_value_from_json(self,data):
+        val = {
+            "uuid":data["uuid"],
+            "lang":data["lang"],
+            "firstname":data["firstname"],
+            "lastname":data["lastname"],
+            "budget_unit_u":data["budget_unit_u"],
+            "introduction_u":data["introduction_u"],
+            "email":data["email"],
+            "tel":data["tel"],
+            "portrait_u":data["portrait_u"],
+            "experience_years":data["experience_years"],
+            "have_exclusive_contract":data["have_exclusive_contract"],
+            "excluesive_contract_content_u":data.get("excluesive_contract_content_u",""),
+
+            "endorsement":data.get("endorsement",""),
+            "specialities_u":data.get("specialities_u",""),
+            "memo_u":data.get("memo_u",""),
+            "intermediate_agency":data.get("intermediate_agency",""),
+            "intermediate_contact":data.get("intermediate_contact",""),
+            "available_from":data.get("available_from",None),
+            "available_util":data.get("available_util",None),
+            "home_page":data.get("home_page",""),
+            "linkin_page":data.get("linkin_page",""),
+            "postal_address":data.get("postal_address",""),
+            "bank_account_info":data.get("bank_account_info",""),
+        }
+        '''   
+        book_u educations creation_pics
+        domain skill_tags product_tags project_tags
+        '''
+        return val
+
+
+    @api.model
+    def get_desiger_info_from_db(self,designer_id):
+        _logger.info(f"designer_id:{designer_id}")
+        designer = self.env['designer.info'].browse([designer_id])
+        _logger.info(f"designer :{designer}")
+        _logger.info(f"type(designer):{type(designer)}")
+        if isinstance(designer,tuple):
+            designer = designer[0]
+        _logger.info(f"designer :{designer}")
+        val = {
+            "firstname":designer.firstname,
+            "lastname":designer.lastname,
+            "endorsement":designer.endorsement,
+            "budget_unit_u":designer.budget_unit_u,
+            "specialities_u":designer.specialities_u,
+            "memo_u":designer.memo_u,
+            "introduction_u":designer.introduction_u,
+            "intermediate_agency":designer.intermediate_agency,
+            "intermediate_contact":designer.intermediate_contact,
+            "email":designer.email,
+            "tel":designer.tel,
+            "portrait_u":designer.portrait_u,
+            "postal_address":designer.postal_address,
+            "bank_account_info":designer.bank_account_info,
+            "have_exclusive_contract":designer.have_exclusive_contract,
+            "excluesive_contract_content_u":designer.excluesive_contract_content_u,
+            "available_from":designer.available_from,
+            "available_util":designer.available_util,
+            "home_page":designer.home_page,
+            "linkin_page":designer.linkin_page,
+            "experience_years":designer.experience_years,
+        }
+        '''   
+        book_u educations creation_pics
+        domain skill_tags product_tags project_tags
+        '''
+        return designer,val
+
+
+    @api.model
     def get_designer_info(self,data):
-        _logger.info('-- in get_designer_info: {data}')
-        _logger.info('-- type of data: {type(data)}')
-        value = {"result":False,
-                 "msg":"hello,designer!",
+        value = {"result":-1,
+                 "errors":"",
                  "data":None}
-        uuid =json.load(data).get("uuid")
-        if uuid == None or uuid == "":
+        try:
+            json_data = json.loads(data)
+        except Exception as e:
+            value["errors"] ="json is not validate"
             return json.dumps(value)
-        designer = self.env['designer.info'].search([['uuid',"=",uuid]])
-        if len(designer) == 0:
+
+        result,_,errors = validate(json_data ,schema_uuid1 ,return_info=True)
+        if result== False:
+            value["errors"] = errors
             return json.dumps(value)
-        else:
-            value['result'] = True
-            value['data'] = designer[0]
+        uuid = json_data['uuid']
+        designer_id = self.env['designer.info'].search([['uuid',"=",uuid]])
+        if len(designer_id ) == 0:
+            value['errors'] = "can't find designer_info by uuid"
             return json.dumps(value)
+        '''
+        try:
+            designer_id = self.env['designer.info'].search([['uuid',"=",uuid]])
+            if len(designer_id) == 0:
+                value['errors'] = "can't find designer_info by uuid"
+                return json.dumps(value)
+        except Exception as e:
+            value['errors'] = 'not valid uuid'
+            return json.dumps(value)
+            '''
+        _,val = self.get_desiger_info_from_db(designer_id)
+        value['result'] = 1
+        value['data'] = val
+        return json.dumps(value)
 
     @api.model
     def update_designer_info(self,data):
-        value = {"result":False,
-                 "msg":"hello,old friend!",
+        value = {"result":-1,
+                 "errors":"",
                  "data":None}
-        designer = self.env['designer.info'].search(['uuid',"=",uuid])
-        return json.dumps()
+        try:
+            json_data = json.loads(data)
+        except Exception as e:
+            value["errors"] ="json is not validate"
+            return json.dumps(value)
+
+        result,_,errors = validate(json_data ,schema_designer ,return_info=True)
+        if result== False:
+            value["errors"] = errors
+            return json.dumps(value)
+
+        uuid = json_data['uuid']
+        try:
+            designer_id = self.env['designer.info'].search([['uuid',"=",uuid]])
+            if len(designer) == 0:
+                value['errors'] = "can't find designer_info by uuid"
+                return json.dumps(value)
+        except Exception as e:
+            value['errors'] = 'not valid uuid'
+            return json.dumps(value)
+            
+        designer,val = self.get_desiger_info_from_db(designer_id)
+
+        try:
+            designer.write(val)
+        except Exception as e:
+            value['errors'] = str(e) 
+            return json.dumps(value)
+        value['result'] = 1
+        return json.dumps(value)
     
 class designer_type(models.Model):
     _name = 'designer.type'
