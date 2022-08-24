@@ -30,6 +30,7 @@
             parent="designer_configure"
             action="designer_field_action"
             />
+        <!--
         <menuitem
             name="designer skill tag"
             id="designer_skill_tag"
@@ -47,6 +48,13 @@
             id="designer_product_tag"
             parent="designer_configure"
             action="designer_product_tag_action"
+            />
+        -->
+        <menuitem
+            name="designer ability tag"
+            id="designer_ability_tag"
+            parent="designer_configure"
+            action="designer_ability_tag_action"
             />
 
     </data>

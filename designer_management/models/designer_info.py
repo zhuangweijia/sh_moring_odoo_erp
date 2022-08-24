@@ -63,12 +63,15 @@ class designer_info(models.Model):
     # Cooperation
     collaboration_status = fields.Boolean(default=False)
     # tags
-    skill_tag_ids = fields.Many2many('designer.skill.tag','designer_skill_tag_rel',
-                                    'info_id', 'skill_id', string='Designer Skill Tag')
-    project_tag_ids = fields.Many2many('designer.project.tag','designer_project_tag_rel',
-                                    'info_id', 'project_id', string='Designer Project Tag')
-    product_tag_ids = fields.Many2many('designer.product.tag','designer_product_tag_rel',
-                                    'info_id', 'product_id', string='Designer Product Tag')
+    skill_tag_ids = fields.Many2many('designer.ability.tag','designer_skill_tag_rel',
+                                    'info_id', 'skill_id', string='Designer Skill Tag',
+                                     domain="[('tag_type','=','0')]")
+    project_tag_ids = fields.Many2many('designer.ability.tag','designer_project_tag_rel',
+                                    'info_id', 'project_id', string='Designer Project Tag',
+                                     domain="[('tag_type','=','2')]")
+    product_tag_ids = fields.Many2many('designer.ability.tag','designer_product_tag_rel',
+                                    'info_id', 'product_id', string='Designer Product Tag',
+                                     domain="[('tag_type','=','1')]")
     type_id = fields.Many2one('designer.type', string='talent type')
     field_ids = fields.Many2many('designer.field', 'designer_info_field_rel',
                                  'info_id','field_id',

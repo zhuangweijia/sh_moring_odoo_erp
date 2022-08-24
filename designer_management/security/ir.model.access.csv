@@ -5,3 +5,4 @@ access_designer_field,Designer Field,model_designer_field,base.group_user,1,1,1,
 access_designer_skill_tag,Designer Skill Tag,model_designer_skill_tag,base.group_user,1,1,1,1
 access_designer_project_tag,Designer Project Tag,model_designer_project_tag,base.group_user,1,1,1,1
 access_designer_product_tag,Designer Product Tag,model_designer_product_tag,base.group_user,1,1,1,1
+access_designer_ability_tag,Designer Ability Tag,model_designer_ability_tag,base.group_user,1,1,1,1

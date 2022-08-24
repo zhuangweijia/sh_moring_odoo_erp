@@ -1,0 +1,59 @@
+<odoo>
+    <data>
+        <record id="view_designer_ability_tag_tree" model="ir.ui.view">
+            <field name="name">designer ability tag</field>
+            <field name="model">designer.ability.tag</field>
+            <field name="arch" type="xml">
+                <tree sample="1">
+                    <field name="name"/>
+                    <field name="create_date" optional="hide"/>
+                    <field name="write_date" optional="hide"/>
+                    <field name="tag_type"/>
+                    <field name="status" widget="badge"
+                        decoration-info="status == 'draft'"
+                        decoration-success="status == 'confirm'"
+                        />
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_designer_ability_tag_form" model="ir.ui.view">
+            <field name="name">designer ability tag</field>
+            <field name="model">designer.ability.tag</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="action_confirm" type="object" string="confirm"
+                            attrs="{'invisible':[('status','!=','draft')]}" class='oe_highlight'/>
+                        <button name="action_draft" type="object" string="back to draft"
+                            attrs="{'invisible':[('status','!=','confirm')]}" class='btn-secondary'/>
+                        <field name="status" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="tag_type"/>
+                            </group>
+                            <group>
+                                <field name="create_date" readonly="1"/>
+                                <field name="write_date" readonly="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" groups="base.group_user"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="designer_ability_tag_action">
+            <field name="name">designer ability tag</field>
+            <field name="res_model">designer.ability.tag</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+    </data>
+</odoo>
