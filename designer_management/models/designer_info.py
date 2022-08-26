@@ -167,7 +167,7 @@ class designer_info(models.Model):
     lang = fields.Char(string='lang')
     firstname = fields.Char(string='first_name')
     lastname = fields.Char(string='last_name')
-    endorsement = fields.Char(string='last_name')
+    endorsement = fields.Char(string='endorsement')
     budget_unit_u = fields.Integer(string='budget_unit_u')
     specialities_u = fields.Char(string='specialities_u')
     memo_u = fields.Char(string='memo_u')
@@ -273,6 +273,11 @@ class designer_info(models.Model):
             value["errors"] = errors
             return json.dumps(value)
 
+        uuid = json_data['uuid']
+        designer_id = self.env['designer.info'].search([['uuid',"=",uuid]])
+        if len(designer_id ) > 0:
+            value['errors'] = "uuid is exist"
+            return json.dumps(value)
         val = self.get_designer_value_from_json(json_data)
         self.env['designer.info'].create(val)
 
@@ -315,14 +320,8 @@ class designer_info(models.Model):
 
 
     @api.model
-    def get_desiger_info_from_db(self,designer_id):
-        _logger.info(f"designer_id:{designer_id}")
-        designer = self.env['designer.info'].browse([designer_id])
-        _logger.info(f"designer :{designer}")
-        _logger.info(f"type(designer):{type(designer)}")
-        if isinstance(designer,tuple):
-            designer = designer[0]
-        _logger.info(f"designer :{designer}")
+    def get_desiger_info_from_db(self,designer):
+        #designer = self.env['designer.info'].browse(designer_id)
         val = {
             "firstname":designer.firstname,
             "lastname":designer.lastname,
@@ -383,7 +382,7 @@ class designer_info(models.Model):
             value['errors'] = 'not valid uuid'
             return json.dumps(value)
             '''
-        _,val = self.get_desiger_info_from_db(designer_id)
+        _,val = self.get_desiger_info_from_db(designer_id[0])
         value['result'] = 1
         value['data'] = val
         return json.dumps(value)
@@ -405,13 +404,9 @@ class designer_info(models.Model):
             return json.dumps(value)
 
         uuid = json_data['uuid']
-        try:
-            designer_id = self.env['designer.info'].search([['uuid',"=",uuid]])
-            if len(designer) == 0:
-                value['errors'] = "can't find designer_info by uuid"
-                return json.dumps(value)
-        except Exception as e:
-            value['errors'] = 'not valid uuid'
+        designer_id = self.env['designer.info'].search([['uuid',"=",uuid]])
+        if len(designer) == 0:
+            value['errors'] = "can't find designer_info by uuid"
             return json.dumps(value)
             
         designer,val = self.get_desiger_info_from_db(designer_id)
