@@ -10,6 +10,7 @@ import json
 #from jsonschema import validate, ValidationError
 from validator import validate
 import logging
+from datetime import datetime
 _logger = logging.getLogger(__name__)
 
 schema_designer = {
@@ -255,6 +256,58 @@ class designer_info(models.Model):
     def action_cancel(self):
         self.write({'status': 'cancel'})
         return
+
+    @api.model
+    def validate_step3(self,data):
+        errors = []
+        schema = {"home_page":50, "linkin_page":50, "intermediate_agency":50, "intermediate_contact":50, "specialities":2000, "memo":2000, "postal_address":200, "bank_account_info":200,}
+        for k,v in schema:
+            val = data.get(k,None)
+            if val != None:
+                if not isinstance(val,str):
+                    errors.append(f'[{k}]: "must be str" ')
+                elif len(val)>v:
+                    errors.append(f'[{k}]: "max length is {v}" ')
+        available_from = data.get("available_from",None)
+        available_until = data.get("available_until",None)
+        
+        # "domain":"required",
+        # "educations":"required",
+        # "creation_pics":"required",
+        # "skill_tags":"required",
+        try:
+            t = datetime.strptime(available_from,"%Y-%m-%d")
+        except Exception as e:
+            errors.append(f'[{available_from}]: shoud be format of "%Y-%m-%d"')
+
+        try:
+            t = datetime.strptime(available_until,"%Y-%m-%d")
+        except Exception as e:
+            errors.append(f'[{available_until}]: shoud be format of "%Y-%m-%d"')
+
+
+        # k = list(set(a).different(set(b)))
+        # t = datetime.strptime("available_from","%Y-%m-%d")
+        # today = datetime.now()
+        return errors
+        
+
+    @api.model
+    def handle_tags(self,designer,origin_data,input_data):
+        all_skill_tag_id = []
+        new_tag = list( set(origin_data.get('skill_tags',[])).difference(set(input_data.get('skill_tags',[])))  )
+        for l in new_tag:
+            ski = self.env['designer.ability.tag'].search([('tag_type','=','0'), ("name",'=',l),])
+            if len(ski) <= 0:
+                k = self.env['designer.ability.tag'].create({'name':l,'tag_type':'0','status':"draft"})
+                all_skill_tag_id.append(k.id)
+        exist_tag = list( set(origin_data.get('skill_tags',[])).intersection(set(input_data.get('skill_tags',[])))  )
+        ski = self.env['designer.ability.tag'].search([('tag_type','=','0'), ("name",'in',exist_tag),])
+        if len(ski) > 0:
+            all_skill_tag_id.extend([i.id for i in ski])
+        designer.skill_tag_ids = [6,0,all_skill_tag_id]
+
+    
 
 
     @api.model
