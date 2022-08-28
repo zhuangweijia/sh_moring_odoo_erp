@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
+import json
 import base64
 import logging
+from validator import validate
+from datetime import datetime
 
 from odoo import models, fields, api, _
 from odoo.exceptions import AccessError
 from odoo.modules.module import get_module_resource
-import json
 #from jsonschema import validate, ValidationError
-from validator import validate
-import logging
-from datetime import datetime
+
 _logger = logging.getLogger(__name__)
 
 schema_designer = {
@@ -134,7 +134,7 @@ def validate_uuid(schema):
 
 class designer_info(models.Model):
     _name = 'designer.info'
-    _description = 'designer infomation'
+    _description = 'designer info'
     # _inherit = ['mail.thread', 'mail.activity.mixin', 'resource.mixin', 'image.mixin']
     _inherit = ['mail.thread', 'mail.activity.mixin', 'image.mixin']
 
@@ -154,8 +154,8 @@ class designer_info(models.Model):
     source = fields.Char(string='source', translate=True, default='bonjourid.com')
     image_1920 = fields.Image('portrait')
     # image_1920 = fields.Image('portrait', default=_default_image)
-    intermediate_contact = fields.Char()
-    intermediate_agency = fields.Char()
+    intermediate_contact = fields.Char(string='intermediate_contact')
+    intermediate_agency = fields.Char(string='intermediate_agency')
     is_trained = fields.Boolean(default=False)
     lastest_trained_date = fields.Date()
     e_signature_pic = fields.Many2many('ir.attachment')
@@ -175,11 +175,6 @@ class designer_info(models.Model):
     introduction_u = fields.Char(string='introduction_u')
     tel = fields.Char(string='tel')
     portrait_u = fields.Char(string='portrait_u')
-    #intermediate_agency = fields.Char(string='intermediate_agency')
-    #intermediate_contact = fields.Char(string='intermediate_contact')
-    #email = fields.Char(string='email')
-    #postal_address = fields.Char(string='postal_address')
-    #bank_account_info = fields.Char(string='bank_account_info')
     have_exclusive_contract = fields.Integer(string='have_exclusive_contract')
     excluesive_contract_content_u = fields.Char(string='excluesive_contract_content_u')
     available_from = fields.Date(string='available_from')
@@ -224,14 +219,21 @@ class designer_info(models.Model):
                                  string='domain') 
     # other
     is_exclusive_signed = fields.Boolean(default=True)
-    # schedule = fields.Boolean('schedule', default=True)
     project = fields.Html('project')
-    # feature = fields.Text(string='feature', help=_('Please enter the characteristics of this designer...'))
     confirmed_date = fields.Datetime()
     status = fields.Selection([('draft','draft'),
                                ('confirm', 'confirm'),
                                ('cancel', 'cancel')], default='draft')
     project_line = fields.One2many('designer.project', 'designer_info_id', string='Projects')
+    intro_video = fields.Char(string='intro video')
+    last_update_by_u = fields.Datetime(required=True)
+    instagram_page = fields.Char()
+    linkedin_page = fields.Char()
+    behance_page = fields.Char()
+    other_page = fields.Char()
+    intermediate_contact_tel = fields.Char()
+    intermediate_contact_email = fields.Char()
+
 
     def action_confirm(self):
         self.write({'status': 'confirm'})
@@ -480,14 +482,14 @@ class designer_project(models.Model):
     # _inherit = ['mail.thread', 'mail.activity.mixin']
 
     designer_uuid = fields.Char()
-    project_name = fields.Char(required=True)
-    position_name = fields.Char(required=True)
-    start_time = fields.Datetime(required=True)
-    end_time = fields.Datetime(required=True)
-    is_current_job = fields.Boolean(default=False)
-    product = fields.Char()
-    client_brand = fields.Char(required=True)
-    description = fields.Text(required=True)
+    project_name = fields.Char(required=True, string='project_name')
+    position_name = fields.Char(required=True, string='title')
+    start_time = fields.Datetime(required=True, string='started at')
+    end_time = fields.Datetime(required=True, string='ended at')
+    is_current_job = fields.Boolean(default=False, string='is my current job')
+    product = fields.Char(string='product')
+    client_brand = fields.Char(required=True, string='client')
+    description = fields.Text(required=True, string='description')
     active = fields.Boolean(default=True)
     photoes = fields.Many2many('ir.attachment')
     designer_info_id = fields.Many2one('designer.info',string='designer info', ondelete='cascade')

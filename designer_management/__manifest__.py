@@ -26,6 +26,7 @@
     'data': [
         'security/ir.model.access.csv',
         'views/designer_info.xml',
+        'views/designer_project.xml',
         'views/designer_options.xml',
         'views/designer_ability_tag.xml',
         'views/menu.xml',

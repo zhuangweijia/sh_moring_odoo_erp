@@ -25,10 +25,6 @@
             <field name="model">designer.project</field>
             <field name="arch" type="xml">
 				<form>
-					<!--
-					<header>
-					</header>
-					-->
 					<sheet>
 						<group>
 							<group>
@@ -45,7 +41,6 @@
 								<field name="description"/>
 								<field name="domain_ids" widget="many2many_tags"/>
 								<field name="photoes" widget="many2many_binary"/>
-								<field name="product"/>
 							</group>
 						</group>
 					</sheet>

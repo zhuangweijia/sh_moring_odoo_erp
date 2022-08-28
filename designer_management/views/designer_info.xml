@@ -69,6 +69,14 @@
                                 <field name='lastest_trained_date'/>
                                 <field name="bank_account_info"/>
                             </group>
+                            <group string='intermediate'>
+                                <field name='intermediate_contact'/>
+                                <field name='intermediate_agency'/>
+                                <field name='intermediate_contact_tel'/>
+                                <field name='intermediate_contact_email'/>
+                            </group>
+                        </group>
+                        <group>
                             <group string='Project'>
                                 <field name="budget_unit"/>
                                 <field name="budget_refer"/>
@@ -79,36 +87,21 @@
                                 <field name="book_status"/>
                                 <field name="confirmed_date"/>
                             </group>
-                        </group>
-                        <group>
-                            <group string='Description'>
-                                <group>
-                                    <field name="memo"/>
-                                </group>
-                            </group>
                             <group string='Tags'>
-                                <!-- <field name="files" widget="many2many_binary"/> -->
                                 <field name="type_id"/>
                                 <field name="domain_ids" widget="many2many_tags"/>
                                 <field name="skill_tag_ids" widget="many2many_tags"/>
                                 <field name="project_tag_ids" widget="many2many_tags"/>
                                 <field name="product_tag_ids" widget="many2many_tags"/>
                             </group>
+                            <group string='Description'>
+                                <group>
+                                    <field name="memo"/>
+                                </group>
+                            </group>
                         </group>
                         <notebook>
-                            <page string="Introduction">
-                                <group>
-                                    <field name="specialities"/>
-                                    <field name="specialities_brief"/>
-                                    <field name="style"/>
-                                    <field name="brief_intro"/>
-                                </group>
-                                <group>
-                                    <field name="endorsement" decoration-danger="endorsement != ''"/>
-                                </group>
-                            </page>
                             <page string="Project">
-									<!--<field name="project" type='html'/>-->
 								<field name="project_line">
 									<tree>
 										<field name="project_name"/>
@@ -119,6 +112,17 @@
 										<field name="client_brand"/>
 									</tree>
 								</field>
+                            </page>
+                            <page string="Introduction">
+                                <group>
+                                    <field name="specialities"/>
+                                    <field name="specialities_brief"/>
+                                    <field name="style"/>
+                                    <field name="brief_intro"/>
+                                </group>
+                                <group>
+                                    <field name="endorsement" decoration-danger="endorsement != ''"/>
+                                </group>
                             </page>
                             <page string="files">
                                 <group>
