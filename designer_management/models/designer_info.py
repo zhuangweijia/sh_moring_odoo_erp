@@ -31,44 +31,6 @@ schema_designer = {
     "skill_tags":"required",
 }
 
-schema_designer2 = {
-    "lang":"required",
-    "uuid":"required",
-    "firstname": "min:3|max:30",
-    "lastname": "min:3|max30",
-    "email":"mail",
-    "budget_unit_u":"required",
-    "introduction_u":"required",
-    "tel":"required",
-    "portrait_u":"required",
-    "have_exclusive_contract":"required",
-    "experience_years":"required",
-    "domain":"required",
-    "educations":"list|min:1",
-    "creation_pics":"list|min:1",
-    "skill_tags":"list|min:1",
-}
-
-'''  
-    #"available_from":lambda x: x == null or x=="" or 
-    #"available_until":"required",
-    #"book_u":"required",
-    "home_page":lambda x:  x == False or isinstance(x,str) and len(x)<= 50,
-    "linkin_page":lambda x:  x == False or isinstance(x,str) and len(x)<= 50,
-    "intermediate_agency":lambda x:  x == False or isinstance(x,str) and len(x)<= 50,
-    "intermediate_contact":lambda x:  x == False or isinstance(x,str) and len(x)<= 50,
-    "specialities":lambda x:   x == False or isinstance(x,str) and len(x)<= 2000,
-    "memo":lambda x:  x == False or isinstance(x,str) and len(x)<= 2000,
-    "postal_address":lambda x:  x == False or isinstance(x,str) and len(x)<= 200,
-    "bank_account_info":lambda x:  x == False or isinstance(x,str) and len(x)<= 200,
-    '''
-
-schema_designer22_= {
-    "uuid":"required",
-    "first_name": "required",
-    "last_name": "required",
-    "email":"required|email",
-}
 
 def json_validate(schema):
     def wrapper(func):
@@ -183,8 +145,6 @@ class designer_info(models.Model):
     linkin_page = fields.Char(string='linkin_page')
     experience_years = fields.Char(string='experience_years')
 
-
-    
     # project
     current_project = fields.Char(translate=True)
     book = fields.Char(translate=True)
@@ -217,6 +177,10 @@ class designer_info(models.Model):
     domain_ids = fields.Many2many('designer.domain', 'designer_info_domain_rel',
                                  'info_id','domain_id',
                                  string='domain') 
+    book_ids = fields.One2many('designer.material.item','designer_id',string='book list')
+    creation_pics_ids = fields.One2many('designer.material.item','designer_id',string='book list')
+    educations_ids = fields.One2many('designer.material.item','designer_id',string='book list')
+    
     # other
     is_exclusive_signed = fields.Boolean(default=True)
     project = fields.Html('project')
@@ -260,56 +224,181 @@ class designer_info(models.Model):
         return
 
     @api.model
-    def validate_step3(self,data):
+    def get_configuration_options(self):
+        value = {"result":1,
+                 "errors":"",
+                 "data":None}
+        val = {}
+        '''  
+        doms = self.env['designer.domain'].search([('')])
+        val['domain'] = [d.name for d in doms]
+        '''
+        tags = self.env['designer.ability.tag'].search(['&',
+                                                 ('tag_type',"=",'0'),
+                                                 ('status','=','confirm')])
+        val['skill_tags'] = [t.name for t in tags]
+        pro = self.env['designer.ability.tag'].search(['&',
+                                                 ('tag_type',"=",'1'),
+                                                 ('status','=','confirm')])
+        val['product_tags'] = [t.name for t in pro]
+        proj = self.env['designer.ability.tag'].search(['&',
+                                                 ('tag_type',"=",'2'),
+                                                 ('status','=','confirm')])
+        val['project_tags'] = [t.name for t in proj]
+        
+        value['data'] = val
+        return json.dumps(value)
+
+
+    @api.model
+    def validate_step2(self,data):
         errors = []
-        schema = {"home_page":50, "linkin_page":50, "intermediate_agency":50, "intermediate_contact":50, "specialities":2000, "memo":2000, "postal_address":200, "bank_account_info":200,}
-        for k,v in schema:
+        schema = {
+                "firstname": 30, "lastname": 30,
+                "introduction_u":2000, "tel":20, "portrait_u":50,
+
+                  "home_page":50, "linkin_page":50, "intermediate_agency":50,
+                  "intermediate_contact":50, "specialities":2000, "memo_u":2000,
+                  "postal_address":200, "bank_account_info":200,
+
+                  "intro_video":50, "instagram_page":50, "linkedin_page":50,
+                  "behance_page":50, "other_page":50,
+                  "intermediate_contact_tel":50,"intermediate_contact_email":50,}
+        for k,v in schema.items():
             val = data.get(k,None)
-            if val != None:
+            if val != None and val != "":
                 if not isinstance(val,str):
                     errors.append(f'[{k}]: "must be str" ')
                 elif len(val)>v:
                     errors.append(f'[{k}]: "max length is {v}" ')
         available_from = data.get("available_from",None)
-        available_until = data.get("available_until",None)
-        
-        # "domain":"required",
-        # "educations":"required",
-        # "creation_pics":"required",
-        # "skill_tags":"required",
         try:
-            t = datetime.strptime(available_from,"%Y-%m-%d")
+            if available_from != None:
+                t = datetime.strptime(available_from,"%Y-%m-%d")
         except Exception as e:
             errors.append(f'[{available_from}]: shoud be format of "%Y-%m-%d"')
 
+        available_until = data.get("available_until",None)
         try:
-            t = datetime.strptime(available_until,"%Y-%m-%d")
+            if available_until != None:
+                t = datetime.strptime(available_until,"%Y-%m-%d")
+                if datetime.strptime() < datetime.now():
+                    errors.append(f'[{available_until}]: shoud be a date in the future')
         except Exception as e:
             errors.append(f'[{available_until}]: shoud be format of "%Y-%m-%d"')
 
-
-        # k = list(set(a).different(set(b)))
-        # t = datetime.strptime("available_from","%Y-%m-%d")
-        # today = datetime.now()
         return errors
         
 
     @api.model
-    def handle_tags(self,designer,origin_data,input_data):
+    def handle_input_list(self,designer,origin_data,input_data):
         all_skill_tag_id = []
-        new_tag = list( set(origin_data.get('skill_tags',[])).difference(set(input_data.get('skill_tags',[])))  )
+        new_tag = list( set(input_data.get('skill_tags',[])).difference(set(origin_data.get('skill_tags',[])))  )
         for l in new_tag:
             ski = self.env['designer.ability.tag'].search([('tag_type','=','0'), ("name",'=',l),])
             if len(ski) <= 0:
                 k = self.env['designer.ability.tag'].create({'name':l,'tag_type':'0','status':"draft"})
                 all_skill_tag_id.append(k.id)
-        exist_tag = list( set(origin_data.get('skill_tags',[])).intersection(set(input_data.get('skill_tags',[])))  )
+            else:
+                project_tag_id_list.append(ski[0].id)
+        exist_tag = list( set(input_data.get('skill_tags',[])).intersection(set(origin_data.get('skill_tags',[])))  )
         ski = self.env['designer.ability.tag'].search([('tag_type','=','0'), ("name",'in',exist_tag),])
         if len(ski) > 0:
             all_skill_tag_id.extend([i.id for i in ski])
-        designer.skill_tag_ids = [6,0,all_skill_tag_id]
+        if len(all_skill_tag_id) > 0:
+            designer.skill_tag_ids = [6,0,all_skill_tag_id]
 
-    
+
+        product_tag_id_list = []
+        new_pro_tag = list( set(input_data.get('product_tags',[])).difference(set(origin_data.get('product_tag_ids',[])))  )
+        for l in new_pro_tag:
+            ski = self.env['designer.ability.tag'].search([('tag_type','=','1'), ("name",'=',l),])
+            if len(ski) <= 0:
+                k = self.env['designer.ability.tag'].create({'name':l,'tag_type':'1','status':"draft"})
+                product_tag_id_list.append(k.id)
+            else:
+                product_tag_id_list.append(ski[0].id)
+        exist_tag = list( set(input_data.get('product_tags',[])).intersection(set(origin_data.get('product_tag_ids',[])))  )
+        ski = self.env['designer.ability.tag'].search([('tag_type','=','1'), ("name",'in',exist_tag),])
+        if len(ski) > 0:
+            product_tag_id_list.extend([i.id for i in ski])
+        if len(product_tag_id_list) > 0:
+            designer.product_tag_ids = [6,0,product_tag_id_list]
+
+
+        project_tag_id = []
+        new_project_tag = list( set(input_data.get('project_tags',[])).difference(set(origin_data.get('project_tag_ids',[])))  )
+        for l in new_project_tag:
+            ski = self.env['designer.ability.tag'].search([('tag_type','=','2'), ("name",'=',l),])
+            if len(ski) <= 0:
+                k = self.env['designer.ability.tag'].create({'name':l,'tag_type':'2','status':"draft"})
+                project_tag_id.append(k.id)
+            else:
+                project_tag_id_list.append(ski[0].id)
+        exist_tag = list( set(input_data.get('project_tags',[])).intersection(set(origin_data.get('project_tag_ids',[])))  )
+        ski = self.env['designer.ability.tag'].search([('tag_type','=','1'), ("name",'in',exist_tag),])
+        if len(ski) > 0:
+            project_tag_id.extend([i.id for i in ski])
+        if len(project_tag_id) > 0:
+            designer.project_tag_ids = [6,0,project_tag_id]
+
+
+        domain_id = []
+        new_domain = list( set(input_data.get('domain',[])).difference(set(origin_data.get('domain',[])))  )
+        for l in new_domain:
+            ski = self.env['designer.domain'].search([("name",'=',l),])
+            if len(ski) <= 0:
+                k = self.env['designer.domain'].create({'name':l})
+                domain_id.append(k.id)
+            else:
+                domain_id.append(ski[0].id)
+        exist_dom = list( set(input_data.get('domain',[])).intersection(set(origin_data.get('domain',[])))  )
+        ski = self.env['designer.domain'].search([('tag_type','=','1'), ("name",'in',exist_dom),])
+        if len(ski) > 0:
+            domain_id.extend([i.id for i in ski])
+        if len(domain_id) > 0:
+            designer.project_tag_ids = [6,0,domain_id]
+        
+
+
+        new_book = list( set(input_data.get('book_u',[])).difference(set(origin_data.get('book_u',[])))  )
+        for b in new_book:
+            designer_id.book_ids = [(0,0,{'url':b,'material_type':'0'})]
+        book_to_del = list( set(origin_data.get('book_u',[])).difference(set(input_data.get('book_u',[]))  ))
+        if len(book_to_del) > 0:
+            mlist = self.env['designer.material.item'].search(['&', 
+                                                              ("url",'in',book_to_del),
+                                                              ("designer_id",'=',designer_id.id),
+                                                             ])
+            for m in mlist:
+                desiger_id.book_ids = [2,m.id]
+
+
+        pics = list( set(input_data.get('creation_pics',[])).difference(set(origin_data.get('creation_pics',[])))  )
+        for b in pics:
+            designer_id.book_ids = [(0,0,{'url':b,'material_type':'1'})]
+        pics_to_del = list( set(origin_data.get('creation_pics',[])).difference(set(input_data.get('creation_pics',[]))))
+        if len(pics_to_del) > 0:
+            mlist = self.env['designer.material.item'].search(['&', 
+                                                              ("url",'in',pics_to_del),
+                                                              ("designer_id",'=',designer_id.id),
+                                                             ])
+            for m in mlist:
+                desiger_id.creation_pics_ids = [2,m.id]
+
+
+        edus = list( set(input_data.get('educations',[])).difference(set(origin_data.get('educations',[])))  )
+        for b in edus:
+            designer_id.book_ids = [(0,0,{'name':b,'material_type':'2'})]
+        edus_to_del = list( set(origin_data.get('educations',[])).difference(set(input_data.get('educations',[]))  ))
+        if len(edus_to_del ) > 0:
+            mlist = self.env['designer.material.item'].search(['&', 
+                                                              ("name",'in',edus_to_del),
+                                                              ("designer_id",'=',designer_id.id),
+                                                             ])
+            for m in mlist:
+                desiger_id.educations_ids = [2,m.id]
+        return []
 
 
     @api.model
@@ -328,6 +417,11 @@ class designer_info(models.Model):
             value["errors"] = errors
             return json.dumps(value)
 
+        errors = self.validate_step2(json_data)
+        if len(errors) > 0:
+            value["errors"] = errors
+            return json.dumps(value)
+
         uuid = json_data['uuid']
         designer_id = self.env['designer.info'].search([['uuid',"=",uuid]])
         if len(designer_id ) > 0:
@@ -335,6 +429,9 @@ class designer_info(models.Model):
             return json.dumps(value)
         val = self.get_designer_value_from_json(json_data)
         self.env['designer.info'].create(val)
+
+        input_list_data = self.get_designer_list_from_json(json_data)
+        self.handle_input_list(designer_id,{},input_list_data)
 
         value['result'] = 1
         return json.dumps(value)
@@ -366,13 +463,28 @@ class designer_info(models.Model):
             "linkin_page":data.get("linkin_page",""),
             "postal_address":data.get("postal_address",""),
             "bank_account_info":data.get("bank_account_info",""),
+
+            "intro_video":data.get("linkin_page",""),
+            "instagram_page":data.get('instagram_page',''),
+            "linkedin_page":data.get('linkedin_page',''),
+            "behance_page":data.get('behance_page',''),
+            "other_page":data.get('other_page',''),
+            "intermediate_contact_tel":data.get('intermediate_contact_tel',''),
+            "intermediate_contact_email":data.get('intermediate_contact_email',''),
         }
-        '''   
-        book_u educations creation_pics
-        domain skill_tags product_tags project_tags
-        '''
         return val
 
+    @api.model
+    def get_designer_list_from_json(self,data):
+        val = {}
+        val['book_u'] = data.get("book_u",[])
+        val['educations'] = data.get("educations",[])
+        val['creation_pics'] = data.get("creation_pics",[])
+        val['domain'] = data.get("domain",[])
+        val['skill_tags'] = data.get("skill_tags",[])
+        val['product_tags'] = data.get("product_tags",[])
+        val['project_tags'] = data.get("project_tags",[])
+        return val
 
     @api.model
     def get_desiger_info_from_db(self,designer):
@@ -399,13 +511,20 @@ class designer_info(models.Model):
             "home_page":designer.home_page,
             "linkin_page":designer.linkin_page,
             "experience_years":designer.experience_years,
+            
+            "intermediate_agenc":designer.intermediate_agenc,
+            "other_page":designer.other_page,
+            "intermediate_contact_tel":designer.intermediate_contact_tel,
+            "intermediate_contact_email":designer.intermediate_contact_email,
         }
-        '''   
-        book_u educations creation_pics
-        domain skill_tags product_tags project_tags
-        '''
-        return designer,val
-
+        val['book_u'] = [b.url for b in designer.book_ids]
+        val['educations'] = [b.name for b in designer.educations_ids]
+        val['creation_pics'] = [b.url for b in designer.creation_pics_ids]
+        val['domain'] = [b.name for b in designer.domain_ids]
+        val['skill_tags'] = [b.name for b in designer.skill_tags]
+        val['product_tags'] = [b.name for b in designer.product_tags]
+        val['project_tags'] = [b.name for b in designer.project_tags]
+        return val
 
     @api.model
     def get_designer_info(self,data):
@@ -427,17 +546,7 @@ class designer_info(models.Model):
         if len(designer_id ) == 0:
             value['errors'] = "can't find designer_info by uuid"
             return json.dumps(value)
-        '''
-        try:
-            designer_id = self.env['designer.info'].search([['uuid',"=",uuid]])
-            if len(designer_id) == 0:
-                value['errors'] = "can't find designer_info by uuid"
-                return json.dumps(value)
-        except Exception as e:
-            value['errors'] = 'not valid uuid'
-            return json.dumps(value)
-            '''
-        _,val = self.get_desiger_info_from_db(designer_id[0])
+        val = self.get_desiger_info_from_db(designer_id[0])
         value['result'] = 1
         value['data'] = val
         return json.dumps(value)
@@ -458,19 +567,28 @@ class designer_info(models.Model):
             value["errors"] = errors
             return json.dumps(value)
 
+        errors = self.validate_step2(json_data)
+        if len(errors) > 0:
+            value["errors"] = errors
+            return json.dumps(value)
+
         uuid = json_data['uuid']
         designer_id = self.env['designer.info'].search([['uuid',"=",uuid]])
         if len(designer) == 0:
             value['errors'] = "can't find designer_info by uuid"
             return json.dumps(value)
-            
-        designer,val = self.get_desiger_info_from_db(designer_id)
 
+        val = self.get_designer_value_from_json(json_data)
         try:
             designer.write(val)
         except Exception as e:
             value['errors'] = str(e) 
             return json.dumps(value)
+
+        origin_data = self.get_desiger_info_from_db(designer_id)
+        input_list_val = self.get_designer_list_from_json(json_data)
+        self.handle_input_list(designer_id,origin_data,input_list_val)
+
         value['result'] = 1
         return json.dumps(value)
     
